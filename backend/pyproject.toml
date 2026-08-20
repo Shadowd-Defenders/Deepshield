@@ -1,0 +1,10 @@
+[project]
+name = "deepverify-backend"
+version = "0.1.0"
+description = "Backend skeleton for DeepVerify media forensic analysis."
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

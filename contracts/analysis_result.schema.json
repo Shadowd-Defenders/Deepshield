@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepverify.local/schemas/analysis_result.schema.json",
+  "title": "DeepVerify Analysis Result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "analysis_id",
+    "status",
+    "media",
+    "overall",
+    "detectors",
+    "artifacts",
+    "processing_warnings",
+    "errors"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "analysis_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["QUEUED", "PROCESSING", "COMPLETED", "FAILED", "EXPIRED"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "media": {
+      "type": "object"
+    },
+    "overall": {
+      "type": "object",
+      "required": ["label", "score", "confidence", "summary", "limitations"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": ["REAL", "SUSPICIOUS", "FAKE", "UNCERTAIN", "INCONCLUSIVE"]
+        },
+        "score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "UNKNOWN"]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "modality_summaries": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "detectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["detector_id", "display_name", "modality", "detector_version", "status", "label"],
+        "properties": {
+          "detector_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "modality": {
+            "type": "string"
+          },
+          "detector_version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "score": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "processing_warnings": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "additionalProperties": true
+}
+

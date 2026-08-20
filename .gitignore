@@ -1,0 +1,238 @@
+# ============================================================
+# Python
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python build/package files
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# ============================================================
+# Virtual environments
+# ============================================================
+
+.venv/
+venv/
+env/
+ENV/
+.env/
+.python-version
+
+# ============================================================
+# Environment / secrets
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+credentials.json
+
+# ============================================================
+# Jupyter
+# ============================================================
+
+.ipynb_checkpoints/
+
+# ============================================================
+# Testing / coverage
+# ============================================================
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# ============================================================
+# Python / ML caches
+# ============================================================
+
+.cache/
+.cache/
+hf_cache/
+huggingface/
+transformers_cache/
+
+# ============================================================
+# Machine Learning models / checkpoints
+# ============================================================
+
+# Large trained model files
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+*.onnx
+*.tflite
+*.h5
+*.hdf5
+*.joblib
+*.pkl
+*.pickle
+
+# Model/checkpoint directories
+**/checkpoints/*
+**/models/*
+**/weights/*
+**/pretrained/*
+**/runs/*
+
+# Keep directory placeholders/documentation
+!**/checkpoints/.gitkeep
+!**/models/.gitkeep
+
+# ============================================================
+# Datasets / generated media
+# ============================================================
+
+# Ignore actual datasets
+**/data/raw/*
+**/data/processed/*
+**/datasets/*
+**/data/*
+**/media/*
+**/uploads/*
+**/outputs/*
+**/artifacts/*
+
+# Keep README/.gitkeep files
+!**/data/.gitkeep
+!**/data/README.md
+!**/data/**/README.md
+
+# ============================================================
+# Audio / Video / Image test files
+# ============================================================
+
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+*.ogg
+
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.webp
+
+# ============================================================
+# Results / generated reports
+# ============================================================
+
+**/results/*
+**/reports/*
+**/logs/*
+
+!**/results/.gitkeep
+!**/results/README.md
+!**/reports/README.md
+
+# ============================================================
+# Node / JavaScript
+# ============================================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.npm/
+.yarn/
+.pnpm-store/
+
+.next/
+.nuxt/
+dist/
+coverage/
+
+# ============================================================
+# Frontend environment files
+# ============================================================
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ============================================================
+# Android / Gradle
+# ============================================================
+
+.gradle/
+**/build/
+local.properties
+
+*.iml
+*.class
+
+# Android generated files
+captures/
+.externalNativeBuild/
+.cxx/
+
+# APK / AAB
+*.apk
+*.aab
+
+# ============================================================
+# IDEs
+# ============================================================
+
+.vscode/
+.idea/
+
+# Keep VS Code shared project configuration if desired
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ============================================================
+# Operating system
+# ============================================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============================================================
+# Logs / temporary files
+# ============================================================
+
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# ============================================================
+# Project-specific generated files
+# ============================================================
+
+structure.txt
+folder_dump.txt

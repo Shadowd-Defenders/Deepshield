@@ -1,0 +1,6 @@
+torch>=2.4,<3
+torchaudio>=2.4,<3
+transformers>=4.44,<6
+numpy>=1.26,<3
+psutil>=5.9,<8
+PyYAML>=6.0,<7

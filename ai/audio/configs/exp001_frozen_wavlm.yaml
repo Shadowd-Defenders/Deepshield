@@ -1,0 +1,40 @@
+experiment:
+  name: exp001_frozen_wavlm
+  seed: 1337
+  task: bonafide_vs_spoof
+
+model:
+  pretrained_model_id: microsoft/wavlm-base-plus
+  freeze_encoder: true
+  classifier_hidden_size: 256
+  dropout: 0.1
+
+audio:
+  sample_rate: 16000
+  segment_seconds: 4.0
+  mono: true
+
+data:
+  manifest_path: data/processed/exp001_manifest.csv
+  label_column: label
+  path_column: path
+  split_column: split
+  labels:
+    bonafide: 0
+    spoof: 1
+
+training:
+  batch_size: 2
+  num_workers: 0
+  epochs: 10
+  learning_rate: 0.0003
+  weight_decay: 0.0
+  patience: 3
+  device: auto
+  gradient_clip_norm: 1.0
+
+outputs:
+  results_dir: results/exp001_frozen_wavlm
+  checkpoint_dir: checkpoints/exp001_frozen_wavlm
+  best_checkpoint_name: best_model.pt
+  last_checkpoint_name: last_model.pt

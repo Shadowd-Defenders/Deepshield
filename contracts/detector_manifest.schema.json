@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepverify.local/schemas/detector_manifest.schema.json",
+  "title": "DeepVerify Detector Manifest",
+  "type": "object",
+  "required": [
+    "detector_id",
+    "display_name",
+    "modality",
+    "version",
+    "model_family",
+    "input_requirements",
+    "output_capabilities"
+  ],
+  "properties": {
+    "detector_id": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "modality": {
+      "type": "string",
+      "enum": ["audio", "video", "provenance", "temporal", "lipsync", "multimodal"]
+    },
+    "version": {
+      "type": "string"
+    },
+    "model_family": {
+      "type": "string"
+    },
+    "input_requirements": {
+      "type": "object"
+    },
+    "output_capabilities": {
+      "type": "object"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}
+
