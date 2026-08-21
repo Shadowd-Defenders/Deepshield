@@ -147,7 +147,7 @@ def read_manifest(
         )
 
     examples: list[AudioExample] = []
-    base_dir = manifest_path.parent
+    base_dir = Path(__file__).resolve().parents[1]
 
     with manifest_path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
