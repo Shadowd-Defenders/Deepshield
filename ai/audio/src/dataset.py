@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 import torch
+import torchaudio
 import torchaudio.functional as audio_functional
 from torch.utils.data import Dataset
 
@@ -57,6 +58,47 @@ def load_pcm_wav_mono(path: Path) -> tuple[torch.Tensor, int]:
 
     audio = audio.reshape(-1, channels).mean(axis=1)
     return torch.from_numpy(audio), sample_rate
+
+
+def _load_flac_mono(path: Path) -> tuple[torch.Tensor, int]:
+    """Load a FLAC file as mono float32 waveform."""
+    if not path.exists():
+        raise FileNotFoundError(f"Audio file does not exist: {path}")
+
+    try:
+        waveform, sample_rate = torchaudio.load(str(path))
+    except Exception as exc:
+        raise RuntimeError(f"Failed to load FLAC audio file '{path}': {exc}") from exc
+
+    if waveform.numel() == 0:
+        raise ValueError(f"Audio file contains no samples: {path}")
+
+    if waveform.ndim == 1:
+        mono = waveform
+    elif waveform.ndim == 2:
+        if waveform.shape[0] < 1:
+            raise ValueError(f"Expected at least one audio channel in {path}")
+        mono = waveform.mean(dim=0)
+    else:
+        raise ValueError(
+            f"Expected FLAC waveform with 1 or 2 dimensions, got {waveform.ndim}: {path}"
+        )
+
+    return mono.to(dtype=torch.float32), sample_rate
+
+
+def _load_audio_mono(path: Path) -> tuple[torch.Tensor, int]:
+    extension = path.suffix.lower()
+    if extension == ".wav":
+        waveform, sample_rate = load_pcm_wav_mono(path)
+        return waveform.to(dtype=torch.float32), sample_rate
+    if extension == ".flac":
+        return _load_flac_mono(path)
+
+    raise ValueError(
+        f"Unsupported audio extension '{path.suffix}' for file: {path}. "
+        "Supported extensions are: .wav, .flac."
+    )
 
 
 def resample_if_needed(
@@ -175,7 +217,7 @@ class WavBinaryDataset(Dataset[dict[str, Any]]):
 
     def __getitem__(self, index: int) -> dict[str, Any]:
         example = self.examples[index]
-        waveform, original_sample_rate = load_pcm_wav_mono(example.path)
+        waveform, original_sample_rate = _load_audio_mono(example.path)
         waveform = resample_if_needed(waveform, original_sample_rate, self.sample_rate)
         waveform = crop_or_pad(waveform, self.target_samples, self.random_crop)
 
