@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import soundfile as sf
 import torch
 import torchaudio
 import torchaudio.functional as audio_functional
@@ -61,27 +62,36 @@ def load_pcm_wav_mono(path: Path) -> tuple[torch.Tensor, int]:
 
 
 def _load_flac_mono(path: Path) -> tuple[torch.Tensor, int]:
-    """Load a FLAC file as mono float32 waveform."""
+    """Load a FLAC file as mono float32 waveform using SoundFile."""
     if not path.exists():
         raise FileNotFoundError(f"Audio file does not exist: {path}")
 
     try:
-        waveform, sample_rate = torchaudio.load(str(path))
+        audio, sample_rate = sf.read(
+            str(path),
+            dtype="float32",
+            always_2d=False,
+        )
     except Exception as exc:
-        raise RuntimeError(f"Failed to load FLAC audio file '{path}': {exc}") from exc
+        raise RuntimeError(
+            f"Failed to load FLAC audio file '{path}': {exc}"
+        ) from exc
 
-    if waveform.numel() == 0:
+    if audio.size == 0:
         raise ValueError(f"Audio file contains no samples: {path}")
+
+    waveform = torch.from_numpy(np.asarray(audio))
 
     if waveform.ndim == 1:
         mono = waveform
     elif waveform.ndim == 2:
-        if waveform.shape[0] < 1:
+        if waveform.shape[1] < 1:
             raise ValueError(f"Expected at least one audio channel in {path}")
-        mono = waveform.mean(dim=0)
+        mono = waveform.mean(dim=1)
     else:
         raise ValueError(
-            f"Expected FLAC waveform with 1 or 2 dimensions, got {waveform.ndim}: {path}"
+            f"Expected FLAC waveform with 1 or 2 dimensions, "
+            f"got {waveform.ndim}: {path}"
         )
 
     return mono.to(dtype=torch.float32), sample_rate
@@ -89,9 +99,11 @@ def _load_flac_mono(path: Path) -> tuple[torch.Tensor, int]:
 
 def _load_audio_mono(path: Path) -> tuple[torch.Tensor, int]:
     extension = path.suffix.lower()
+
     if extension == ".wav":
         waveform, sample_rate = load_pcm_wav_mono(path)
         return waveform.to(dtype=torch.float32), sample_rate
+
     if extension == ".flac":
         return _load_flac_mono(path)
 
@@ -108,6 +120,7 @@ def resample_if_needed(
 ) -> torch.Tensor:
     if original_sample_rate == target_sample_rate:
         return waveform
+
     return audio_functional.resample(
         waveform,
         orig_freq=original_sample_rate,
@@ -151,17 +164,23 @@ def read_manifest(
 
     with manifest_path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
+
         required = {path_column, label_column, split_column}
         missing = required.difference(reader.fieldnames or [])
+
         if missing:
-            raise ValueError(f"Manifest is missing required columns: {sorted(missing)}")
+            raise ValueError(
+                f"Manifest is missing required columns: {sorted(missing)}"
+            )
 
         for row in reader:
             row_split = row[split_column].strip().lower()
+
             if row_split != split:
                 continue
 
             label_name = row[label_column].strip().lower()
+
             if label_name not in label_map:
                 raise ValueError(
                     f"Unknown label '{label_name}' in manifest. "
@@ -169,15 +188,22 @@ def read_manifest(
                 )
 
             audio_path = Path(row[path_column].strip())
+
             if not audio_path.is_absolute():
                 audio_path = base_dir / audio_path
 
             examples.append(
-                AudioExample(path=audio_path, label=label_map[label_name], split=row_split)
+                AudioExample(
+                    path=audio_path,
+                    label=label_map[label_name],
+                    split=row_split,
+                )
             )
 
     if not examples:
-        raise ValueError(f"No examples found for split '{split}' in {manifest_path}")
+        raise ValueError(
+            f"No examples found for split '{split}' in {manifest_path}"
+        )
 
     return examples
 
@@ -205,6 +231,7 @@ class WavBinaryDataset(Dataset[dict[str, Any]]):
             label_column=label_column,
             split_column=split_column,
         )
+
         self.sample_rate = sample_rate
         self.target_samples = int(round(sample_rate * segment_seconds))
         self.random_crop = random_crop
@@ -217,9 +244,20 @@ class WavBinaryDataset(Dataset[dict[str, Any]]):
 
     def __getitem__(self, index: int) -> dict[str, Any]:
         example = self.examples[index]
+
         waveform, original_sample_rate = _load_audio_mono(example.path)
-        waveform = resample_if_needed(waveform, original_sample_rate, self.sample_rate)
-        waveform = crop_or_pad(waveform, self.target_samples, self.random_crop)
+
+        waveform = resample_if_needed(
+            waveform,
+            original_sample_rate,
+            self.sample_rate,
+        )
+
+        waveform = crop_or_pad(
+            waveform,
+            self.target_samples,
+            self.random_crop,
+        )
 
         return {
             "input_values": waveform.float(),
@@ -229,9 +267,17 @@ class WavBinaryDataset(Dataset[dict[str, Any]]):
         }
 
 
-def collate_audio_batch(batch: list[dict[str, Any]]) -> dict[str, Any]:
-    input_values = torch.stack([item["input_values"] for item in batch])
-    labels = torch.stack([item["labels"] for item in batch])
+def collate_audio_batch(
+    batch: list[dict[str, Any]],
+) -> dict[str, Any]:
+    input_values = torch.stack(
+        [item["input_values"] for item in batch]
+    )
+
+    labels = torch.stack(
+        [item["labels"] for item in batch]
+    )
+
     return {
         "input_values": input_values,
         "labels": labels,
